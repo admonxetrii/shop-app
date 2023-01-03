@@ -1,41 +1,60 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shop_app/screens/products_details_screen.dart';
 
-class ProductItem extends StatelessWidget {
-  final String id;
-  final String title;
-  final String imageUrl;
+import '../providers/product.dart';
 
-  ProductItem(this.id, this.title, this.imageUrl);
+class ProductItem extends StatelessWidget {
+  // final String id;
+  // final String title;
+  // final String imageUrl;
+  //
+  // ProductItem(this.id, this.title, this.imageUrl);
 
   @override
   Widget build(BuildContext context) {
+    final product = Provider.of<Product>(context, listen: false);
     return ClipRRect(
       borderRadius: BorderRadius.circular(10),
       child: GridTile(
         child: GestureDetector(
           onTap: () {
-            Navigator.of(context)
-                .pushNamed(ProductDetailScreen.routeName, arguments: id);
+            Navigator.of(context).pushNamed(ProductDetailScreen.routeName,
+                arguments: product.id);
           },
           child: Image.network(
-            imageUrl,
+            product.imageUrl,
             fit: BoxFit.cover,
           ),
         ),
         footer: GridTileBar(
           backgroundColor: Colors.black87,
-          leading: IconButton(
-            icon: Icon(Icons.favorite_outline),
-            onPressed: () {},
+          leading: Consumer<Product>(
+            builder: (ctx, product, _) =>
+                IconButton(
+                  icon: Icon(
+                    product.isFavorite ? Icons.favorite : Icons
+                        .favorite_outline,
+                    color: product.isFavorite
+                        ? Theme
+                        .of(context)
+                        .accentColor
+                        : Colors.white,
+                  ),
+                  onPressed: () {
+                    product.toggleFavouriteStatus();
+                  },
+                ),
           ),
           trailing: IconButton(
             icon: Icon(Icons.shopping_cart),
             onPressed: () {},
-            color: Theme.of(context).accentColor,
+            color: Theme
+                .of(context)
+                .accentColor,
           ),
           title: Text(
-            title,
+            product.title,
             textAlign: TextAlign.center,
           ),
         ),
