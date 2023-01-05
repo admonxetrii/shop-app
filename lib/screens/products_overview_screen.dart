@@ -7,6 +7,8 @@ import 'package:shop_app/widgets/app_drawer.dart';
 import 'package:shop_app/widgets/badge.dart';
 import 'package:shop_app/widgets/products_grid.dart';
 
+import '../providers/products.dart';
+
 enum FilterOptions {
   Favourites,
   All,
@@ -19,6 +21,24 @@ class ProductsOverviewScreen extends StatefulWidget {
 
 class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
   var _showOnlyFavourites = false;
+  bool _isInit = true;
+  bool _isLoading = false;
+
+  @override
+  void didChangeDependencies() {
+    if (_isInit) {
+      setState(() {
+        _isLoading = true;
+      });
+      Provider.of<Products>(context).fetchAndSetProducts().then((_) {
+        setState(() {
+          _isLoading = false;
+        });
+      });
+    }
+    _isInit = false;
+    super.didChangeDependencies();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +70,10 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
           Consumer<Cart>(
             builder: (_, cart, child) => Badge(
                 child: IconButton(
-                  icon: Icon(Icons.shopping_cart, color: Colors.white,),
+                  icon: Icon(
+                    Icons.shopping_cart,
+                    color: Colors.white,
+                  ),
                   onPressed: () {
                     Navigator.of(context).pushNamed(CartScreen.routeName);
                   },
@@ -61,7 +84,11 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
         ],
       ),
       drawer: AppDrawer(),
-      body: ProductsGrid(_showOnlyFavourites),
+      body: _isLoading
+          ? Center(
+              child: CircularProgressIndicator(),
+            )
+          : ProductsGrid(_showOnlyFavourites),
     );
   }
 }
